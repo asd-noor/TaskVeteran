@@ -1,0 +1,9 @@
+= TaskVeteran
+:taskwarrior_site: https://taskwarrior.org
+
+A ToDo list manager, inspired by mighty {taskwarrior_site}[taskwarrior].
+
+
+== Contributors
+* https://github.com/darrSonik[Asaduzzaman Noor]
+* https://github.com/nahiyan[Nahiyan Alamgir]
