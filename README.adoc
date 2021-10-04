@@ -1,7 +1,8 @@
 = TaskVeteran
 :taskwarrior_site: https://taskwarrior.org
+:graph_ds: https://en.wikipedia.org/wiki/Graph_(abstract_data_type)
 
-A ToDo list manager, inspired by mighty {taskwarrior_site}[taskwarrior].
+A {graph_ds}[graph-based] *To Do List* manager, inspired by mighty {taskwarrior_site}[Taskwarrior].
 
 
 == Contributors
