@@ -5,6 +5,6 @@
 A {graph_ds}[graph-based] *To-Do List* manager, inspired by the mighty {taskwarrior_site}[Taskwarrior].
 
 
-== Contributors
+== Collaborators
 * https://github.com/darrSonik[Asaduzzaman Noor]
 * https://github.com/nahiyan[Nahiyan Alamgir]
