@@ -2,7 +2,7 @@
 :taskwarrior_site: https://taskwarrior.org
 :graph_ds: https://en.wikipedia.org/wiki/Graph_(abstract_data_type)
 
-A {graph_ds}[graph-based] *To Do List* manager, inspired by the mighty {taskwarrior_site}[Taskwarrior].
+A {graph_ds}[graph-based] *To-Do List* manager, inspired by the mighty {taskwarrior_site}[Taskwarrior].
 
 
 == Contributors
