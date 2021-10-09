@@ -3,29 +3,41 @@ use petgraph::visit::Dfs;
 use petgraph::Direction;
 use petgraph::Graph;
 
+#[derive(PartialEq)]
 pub struct ToDoListItem {
     label: String,
+    completed: bool,
 }
 
 impl ToDoListItem {
-    pub fn new(label: &str) -> ToDoListItem {
+    pub fn new(label: &str) -> Self {
         ToDoListItem {
             label: String::from(label),
+            completed: false,
         }
     }
 }
 
-// pub struct View {
+#[derive(PartialEq)]
+pub struct View {
+    name: String,
+}
 
-// }
+impl View {
+    pub fn new(name: String) -> Self {
+        View { name: name }
+    }
+}
 
-// pub enum NodeType {
-//     ToDoListItem,
-//     View,
-// }
+#[derive(PartialEq)]
+pub enum NodeItem {
+    Item(ToDoListItem),
+    View(View),
+    Root,
+}
 
 pub struct ToDoList {
-    content: Graph<ToDoListItem, ()>,
+    content: Graph<NodeItem, ()>,
 }
 
 impl ToDoList {
@@ -34,28 +46,30 @@ impl ToDoList {
             content: Graph::new(),
         };
 
-        list.add(
-            ToDoListItem {
-                label: String::from("root"),
-            },
-            None,
-        );
+        list.content.add_node(NodeItem::Root);
 
         list
     }
 
     pub fn add(&mut self, item: ToDoListItem, parent_: Option<usize>) -> Option<NodeIndex> {
-        let child = self.content.add_node(item);
+        let child = self.content.add_node(NodeItem::Item(item));
 
-        if let Some(parent) = parent_ {
-            self.content.add_edge(NodeIndex::new(parent), child, ());
-        }
+        let parent = if let Some(parent) = parent_ {
+            parent
+        } else {
+            0
+        };
+
+        self.content.add_edge(NodeIndex::new(parent), child, ());
 
         Some(child)
     }
 
     pub fn get(&self, id: usize) -> Option<&ToDoListItem> {
-        self.content.node_weight(NodeIndex::new(id))
+        match self.content.node_weight(NodeIndex::new(id)) {
+            Some(NodeItem::Item(item)) => Some(item),
+            _ => None,
+        }
     }
 
     pub fn remove(&mut self, id: usize) -> Option<usize> {
@@ -124,19 +138,13 @@ mod tests {
 
         assert_eq!(1, list.content.node_count());
         assert_eq!(0, list.content.edge_count());
-        assert!(list
-            .content
-            .node_indices()
-            .find(|i| i.index() == 0)
-            .is_some());
 
-        assert_eq!(
-            "root",
-            match list.get(0) {
-                Some(item) => item.label.as_str(),
-                None => "",
-            }
-        );
+        // assert_eq!(NodeItem::Root, );
+        if let Some(root) = list.content.node_weight(NodeIndex::new(0)) {
+            assert!(NodeItem::Root == *root);
+        } else {
+            panic!("No node found");
+        }
     }
     #[test]
     fn gets_children() {
@@ -159,19 +167,28 @@ mod tests {
         list.add(ToDoListItem::new("item1"), Some(0));
         list.add(ToDoListItem::new("item2"), Some(0));
         list.add(ToDoListItem::new("item3"), Some(0));
-
         let removed_node_ = list.remove(2);
+
+        // Check that the selected node has been removed
         assert!(removed_node_.is_some());
-        assert_eq!(2, removed_node_.unwrap());
-        assert_eq!(
-            "item3",
-            list.content.node_weight(NodeIndex::new(2)).unwrap().label
-        );
-        assert_eq!(
-            "item1",
-            list.content.node_weight(NodeIndex::new(1)).unwrap().label
-        );
-        assert_eq!(3, list.content.node_count());
+        if let Some(removed_node) = removed_node_ {
+            assert_eq!(2, removed_node);
+        } else {
+            panic!("Item 2 not removed");
+        }
+
+        // Check if the rest of the nodes are intact
+        if let Some(NodeItem::Item(item3)) = list.content.node_weight(NodeIndex::new(2)) {
+            assert_eq!("item3", item3.label);
+        } else {
+            panic!("Item 3 should exist");
+        }
+
+        if let Some(NodeItem::Item(item1)) = list.content.node_weight(NodeIndex::new(1)) {
+            assert_eq!("item1", item1.label);
+        } else {
+            panic!("Item 1 should exist");
+        }
     }
     #[test]
     fn ignores_root_removal() {
