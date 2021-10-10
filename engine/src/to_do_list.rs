@@ -139,7 +139,6 @@ mod tests {
         assert_eq!(1, list.content.node_count());
         assert_eq!(0, list.content.edge_count());
 
-        // assert_eq!(NodeItem::Root, );
         if let Some(root) = list.content.node_weight(NodeIndex::new(0)) {
             assert!(NodeItem::Root == *root);
         } else {
@@ -204,7 +203,7 @@ mod tests {
         assert_eq!(list.content.edge_count(), 3);
     }
     #[test]
-    fn deep_remove_node() {
+    fn deep_removes_node() {
         let mut list = ToDoList::new();
 
         list.add(ToDoListItem::new("item1"), Some(0));
