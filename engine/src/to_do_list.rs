@@ -1,7 +1,6 @@
 use petgraph::graph::NodeIndex;
 use petgraph::visit::Dfs;
-use petgraph::Direction;
-use petgraph::Graph;
+use petgraph::{Direction, Graph};
 
 #[derive(PartialEq)]
 pub struct ToDoListItem {
