@@ -1,57 +1,27 @@
+use crate::graph::NodeItem;
+use crate::to_do_list_item::ToDoListItem;
 use petgraph::graph::NodeIndex;
 use petgraph::visit::Dfs;
 use petgraph::{Direction, Graph};
 
-#[derive(PartialEq)]
-pub struct ToDoListItem {
-    label: String,
-    completed: bool,
-}
-
-impl ToDoListItem {
-    pub fn new(label: &str) -> Self {
-        ToDoListItem {
-            label: String::from(label),
-            completed: false,
-        }
-    }
-}
-
-#[derive(PartialEq)]
-pub struct View {
-    name: String,
-}
-
-impl View {
-    pub fn new(name: String) -> Self {
-        View { name: name }
-    }
-}
-
-#[derive(PartialEq)]
-pub enum NodeItem {
-    Item(ToDoListItem),
-    View(View),
-    Root,
-}
-
 pub struct ToDoList {
-    content: Graph<NodeItem, ()>,
+    graph: Box<Graph<NodeItem, ()>>,
 }
 
 impl ToDoList {
-    pub fn new() -> ToDoList {
-        let mut list = ToDoList {
-            content: Graph::new(),
-        };
+    pub fn new() -> Self {
+        let graph = Box::new(Graph::new());
+        ToDoList::from_graph(graph)
+    }
 
-        list.content.add_node(NodeItem::Root);
+    pub fn from_graph(mut graph: Box<Graph<NodeItem, ()>>) -> Self {
+        graph.add_node(NodeItem::Root);
 
-        list
+        ToDoList { graph: graph }
     }
 
     pub fn add(&mut self, item: ToDoListItem, parent_: Option<usize>) -> Option<NodeIndex> {
-        let child = self.content.add_node(NodeItem::Item(item));
+        let child = self.graph.add_node(NodeItem::Item(item));
 
         let parent = if let Some(parent) = parent_ {
             parent
@@ -59,13 +29,13 @@ impl ToDoList {
             0
         };
 
-        self.content.add_edge(NodeIndex::new(parent), child, ());
+        self.graph.add_edge(NodeIndex::new(parent), child, ());
 
         Some(child)
     }
 
     pub fn get(&self, id: usize) -> Option<&ToDoListItem> {
-        match self.content.node_weight(NodeIndex::new(id)) {
+        match self.graph.node_weight(NodeIndex::new(id)) {
             Some(NodeItem::Item(item)) => Some(item),
             _ => None,
         }
@@ -80,7 +50,7 @@ impl ToDoList {
         } else {
             let children = self.deep_children(id);
 
-            self.content.retain_nodes(|_, node| -> bool {
+            self.graph.retain_nodes(|_, node| -> bool {
                 children
                     .iter()
                     .position(|&i| -> bool {
@@ -100,9 +70,10 @@ impl ToDoList {
 
     // includes the parent
     pub fn deep_children(&self, id: usize) -> Vec<usize> {
-        let mut dfs = Dfs::new(&self.content, NodeIndex::new(id));
+        let graph = &*self.graph;
+        let mut dfs = Dfs::new(&graph, NodeIndex::new(id));
         let mut children = vec![];
-        while let Some(item) = dfs.next(&self.content) {
+        while let Some(item) = dfs.next(&graph) {
             children.push(item.index());
         }
 
@@ -112,7 +83,7 @@ impl ToDoList {
     pub fn children(&self, index: usize) -> Vec<usize> {
         let mut items = vec![];
         for item in self
-            .content
+            .graph
             .neighbors_directed(NodeIndex::new(index), Direction::Outgoing)
         {
             items.push(item.index());

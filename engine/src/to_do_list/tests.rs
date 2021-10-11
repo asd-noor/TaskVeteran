@@ -9,10 +9,10 @@ fn gets_nothing() {
 fn root_exists() {
     let list = ToDoList::new();
 
-    assert_eq!(1, list.content.node_count());
-    assert_eq!(0, list.content.edge_count());
+    assert_eq!(1, list.graph.node_count());
+    assert_eq!(0, list.graph.edge_count());
 
-    if let Some(root) = list.content.node_weight(NodeIndex::new(0)) {
+    if let Some(root) = list.graph.node_weight(NodeIndex::new(0)) {
         assert!(NodeItem::Root == *root);
     } else {
         panic!("No node found");
@@ -50,13 +50,13 @@ fn removes_node() {
     }
 
     // Check if the rest of the nodes are intact
-    if let Some(NodeItem::Item(item3)) = list.content.node_weight(NodeIndex::new(2)) {
+    if let Some(NodeItem::Item(item3)) = list.graph.node_weight(NodeIndex::new(2)) {
         assert_eq!("item3", item3.label);
     } else {
         panic!("Item 3 should exist");
     }
 
-    if let Some(NodeItem::Item(item1)) = list.content.node_weight(NodeIndex::new(1)) {
+    if let Some(NodeItem::Item(item1)) = list.graph.node_weight(NodeIndex::new(1)) {
         assert_eq!("item1", item1.label);
     } else {
         panic!("Item 1 should exist");
@@ -72,8 +72,8 @@ fn ignores_root_removal() {
 
     assert!(list.remove(0).is_none());
 
-    assert_eq!(list.content.node_count(), 4);
-    assert_eq!(list.content.edge_count(), 3);
+    assert_eq!(list.graph.node_count(), 4);
+    assert_eq!(list.graph.edge_count(), 3);
 }
 #[test]
 fn deep_removes_node() {
@@ -85,8 +85,8 @@ fn deep_removes_node() {
 
     assert!(list.remove(1).is_some());
 
-    assert_eq!(list.content.node_count(), 1);
-    assert_eq!(list.content.edge_count(), 0);
+    assert_eq!(list.graph.node_count(), 1);
+    assert_eq!(list.graph.edge_count(), 0);
 }
 #[test]
 fn finds_deep_children() {
